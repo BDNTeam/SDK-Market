@@ -2,11 +2,11 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./Asset.sol";
-import "../token/BDNToken.sol";
+import "../token/EIP20Interface.sol";
 
 contract Market is Ownable {
 
-  BDNToken bdn;
+  EIP20Interface bdn;
 
   address[] public assets;
   mapping(address => uint) public assetIndexes;
@@ -14,7 +14,7 @@ contract Market is Ownable {
   event NewAsset(string asset, address seller, uint price);
 
   constructor(address _bdn) public {
-    bdn = BDNToken(_bdn);
+    bdn = EIP20Interface(_bdn);
   }
 
   function sell(string asset, uint price) public {

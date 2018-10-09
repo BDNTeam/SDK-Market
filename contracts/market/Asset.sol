@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "../token/BDNToken.sol";
+import "../token/EIP20Interface.sol";
 
 contract Asset {
   using SafeMath for uint;
 
-  BDNToken bdn;
+  EIP20Interface bdn;
 
   string public assetId;
   uint public expectPrice;
@@ -26,7 +26,7 @@ contract Asset {
   event NewBuyer(string asset, address seller, address buyer);
 
   constructor(address _bdn, address _referee, address _seller, string _assetId, uint _price) public {
-    bdn = BDNToken(_bdn);
+    bdn = EIP20Interface(_bdn);
     referee = _referee;
     seller = _seller;
     assetId = _assetId;

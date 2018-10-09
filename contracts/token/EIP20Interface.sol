@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 
 /// @title ERC Token Standard #20 Interface
 /// See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
-contract ERC20Compatible {
+contract EIP20Interface {
 
   function name() public view returns (string);
   function symbol() public view returns (string);

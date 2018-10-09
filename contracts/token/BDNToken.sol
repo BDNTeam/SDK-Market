@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./ERC20Compatible.sol";
+import "./EIP20Interface.sol";
 
 
 /**
@@ -15,7 +15,7 @@ import "./ERC20Compatible.sol";
  *
  * (c) BDNTeam 2018. The MIT Licence.
  */
-contract BDNToken is ERC20Compatible, Ownable {
+contract BDNToken is EIP20Interface, Ownable {
 
   using SafeMath for uint256;
 
