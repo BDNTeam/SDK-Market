@@ -12,13 +12,15 @@
  *   },
  */
 
+const path = require("path");
 const Web3 = require("web3");
-const web3 = new Web3();
 const HDWalletProvider = require("truffle-hdwallet-provider");
-const mnemonic = "";
 
 const WalletProvider = require("truffle-wallet-provider");
 const Wallet = require("ethereumjs-wallet");
+
+const web3 = new Web3();
+const mnemonic = "";
 
 const rawMainPrivateKey = process.env["MAINNET_PRIVATE_KEY"];
 const rawRinkebyPrivateKey = process.env["RINKEBY_PRIVATE_KEY"];
@@ -46,6 +48,10 @@ if (rawRinkebyPrivateKey) {
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
+  contracts_build_directory: path.resolve(
+    __dirname,
+    "../sdk-eth-server/src/contracts"
+  ),
   networks: {
     development: {
       host: "127.0.0.1",

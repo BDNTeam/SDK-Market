@@ -11,7 +11,7 @@ contract Market is Ownable {
   address[] public assets;
   mapping(address => uint) public assetIndexes;
 
-  event NewAsset(string asset, address seller, uint price);
+  event NewAsset(address mktId, string asset, address seller, uint price);
 
   constructor(address _bdn) public {
     bdn = EIP20Interface(_bdn);
@@ -22,6 +22,6 @@ contract Market is Ownable {
     assets.push(asset_);
     assetIndexes[address(asset_)] = 1;
 
-    emit NewAsset(asset, msg.sender, price);
+    emit NewAsset(address(asset_), asset, msg.sender, price);
   }
 }

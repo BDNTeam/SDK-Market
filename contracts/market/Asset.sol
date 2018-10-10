@@ -23,7 +23,9 @@ contract Asset {
   /// http://solidity.readthedocs.io/en/v0.4.24/common-patterns.html
   mapping(address => uint) public pendingWithdrawals;
 
-  event NewBuyer(string asset, address seller, address buyer);
+  event NewBuyer(address mktId, string asset, address seller, address buyer);
+
+  event NewDeal(address mktId, string asset, address seller, address operator, uint val);
 
   constructor(address _bdn, address _referee, address _seller, string _assetId, uint _price) public {
     bdn = EIP20Interface(_bdn);
@@ -39,7 +41,7 @@ contract Asset {
   }
 
   modifier onlyRefereeOrBuyer {
-    bool isBuyer_ = isBuyer();
+    bool isBuyer_ = isBuyer(msg.sender);
     require(isBuyer_ || msg.sender == referee, "forbidden");
     _;
   }
@@ -57,28 +59,19 @@ contract Asset {
 
     buyers.push(msg.sender);
     buyerIndexes[msg.sender] = 1;
-    paidPrices[msg.sender] = price;
-    emit NewBuyer(assetId, seller, msg.sender);
+    paidPrices[msg.sender] = price.add(paidPrices[msg.sender]);
+    emit NewBuyer(address(this), assetId, seller, msg.sender);
   }
 
-  function isBuyer() public view returns(bool) {
-    return buyerIndexes[msg.sender] == 1;
+  function isBuyer(address u) public view returns(bool) {
+    return buyerIndexes[u] == 1;
   }
 
   function deal() public onlyRefereeOrBuyer {
-    uint v = expectPrice;
-    if(isBuyer()) {
-      v = paidPrices[msg.sender];
-    }
-    refund_(msg.sender, v);
-  }
-
-  function withdraw() public {
-    withdraw_(msg.sender);
-  }
-
-  function withdrawTo(address u) public onlyReferee {
-    withdraw_(u);
+    uint v = paidPrices[msg.sender];
+    refund_(seller, v);
+    withdraw_(seller);
+    emit NewDeal(address(this), assetId, seller, msg.sender, v);
   }
 
   function withdraw_(address u) private {
@@ -87,10 +80,6 @@ contract Asset {
       pendingWithdrawals[u] = 0;
       bdn.transfer(u, val);
     }
-  }
-
-  function refund() private {
-    refund_(msg.sender,msg.value);
   }
 
   function refund_(address u, uint val) private {
