@@ -17,8 +17,8 @@ contract Market is Ownable {
     bdn = EIP20Interface(_bdn);
   }
 
-  function sell(string asset, uint price) public {
-    Asset asset_ = new Asset(bdn, owner, msg.sender, asset, price);
+  function sell(string cdbAddress, string boxAddress, string asset, uint price) public {
+    Asset asset_ = new Asset(bdn, owner, msg.sender, cdbAddress, boxAddress, asset, price);
     assets.push(asset_);
     assetIndexes[address(asset_)] = 1;
 

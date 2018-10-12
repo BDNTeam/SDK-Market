@@ -12,6 +12,8 @@ contract Asset {
   uint public expectPrice;
 
   address public seller;
+  string public sellerCdbAddress;
+  string public sellerBoxAddress;
 
   address public buyer;
   string public buyerCdbAddress;
@@ -21,16 +23,36 @@ contract Asset {
 
   uint public paidPrice;
 
-  event Paid(address mktId, string asset, address seller, address buyer, string buyerCdbAddress, string buyerBoxAddress);
+  event Paid(
+    address mktId,
+    string asset,
+    address seller,
+    string sellerCdbAddress,
+    string sellerBoxAddress,
+    address buyer,
+    string buyerCdbAddress,
+    string buyerBoxAddress
+  );
 
   event Dealt(address mktId, string asset, address seller, uint val);
 
-  constructor(address _bdn, address _referee, address _seller, string _assetId, uint _price) public {
-    bdn = EIP20Interface(_bdn);
-    referee = _referee;
-    seller = _seller;
-    assetId = _assetId;
-    expectPrice = _price;
+  constructor(
+    address bdn_,
+    address referee_,
+    address seller_,
+    string sellerCdbAddress_,
+    string sellerBoxAddress_,
+    string assetId_,
+    uint price) public {
+
+    bdn = EIP20Interface(bdn_);
+    referee = referee_;
+    seller = seller_;
+    sellerCdbAddress = sellerCdbAddress_;
+    sellerBoxAddress = sellerBoxAddress_;
+    assetId = assetId_;
+    expectPrice = price;
+
   }
 
   modifier onlyReferee {
@@ -60,7 +82,16 @@ contract Asset {
     buyerBoxAddress = buyerBoxAddress_;
 
     paidPrice = price;
-    emit Paid(address(this), assetId, seller, buyer, buyerCdbAddress, buyerBoxAddress);
+    emit Paid(
+      address(this),
+      assetId,
+      seller,
+      sellerCdbAddress,
+      sellerBoxAddress,
+      buyer,
+      buyerCdbAddress,
+      buyerBoxAddress
+    );
   }
 
   function transfer(address to, uint amount) public onlyReferee {
