@@ -12,20 +12,18 @@ contract Asset {
   uint public expectPrice;
 
   address public seller;
-  address[] public buyers;
-  mapping(address => uint) public buyerIndexes;
+
+  address public buyer;
+  string public buyerCdbAddress;
+  string public buyerBoxAddress;
 
   address public referee;
 
-  mapping(address => uint) public paidPrices;
+  uint public paidPrice;
 
-  /// for why not using an automatic refund see:
-  /// http://solidity.readthedocs.io/en/v0.4.24/common-patterns.html
-  mapping(address => uint) public pendingWithdrawals;
+  event Paid(address mktId, string asset, address seller, address buyer, string buyerCdbAddress, string buyerBoxAddress);
 
-  event NewBuyer(address mktId, string asset, address seller, address buyer);
-
-  event NewDeal(address mktId, string asset, address seller, address operator, uint val);
+  event Dealt(address mktId, string asset, address seller, uint val);
 
   constructor(address _bdn, address _referee, address _seller, string _assetId, uint _price) public {
     bdn = EIP20Interface(_bdn);
@@ -52,39 +50,37 @@ contract Asset {
    * `this asset contract` to manipulate his allowance, since `this asset
    * contract` will role as a referee during the buying and selling process
    */
-  function buy(uint price) public {
-    require(price >= expectPrice, "less price");
+  function buy(string buyerCdbAddress_, string buyerBoxAddress_, uint price) public {
+    if (price < expectPrice || buyer != address(0)) return;
 
     bdn.transferFrom(msg.sender, address(this), price);
 
-    buyers.push(msg.sender);
-    buyerIndexes[msg.sender] = 1;
-    paidPrices[msg.sender] = price.add(paidPrices[msg.sender]);
-    emit NewBuyer(address(this), assetId, seller, msg.sender);
+    buyer = msg.sender;
+    buyerCdbAddress = buyerCdbAddress_;
+    buyerBoxAddress = buyerBoxAddress_;
+
+    paidPrice = price;
+    emit Paid(address(this), assetId, seller, buyer, buyerCdbAddress, buyerBoxAddress);
+  }
+
+  function transfer(address to, uint amount) public onlyReferee {
+    bdn.transfer(to, amount);
+  }
+
+  function bdnAmount() public view returns(uint) {
+    return bdn.balanceOf(address(this));
   }
 
   function isBuyer(address u) public view returns(bool) {
-    return buyerIndexes[u] == 1;
+    return buyer == u;
+  }
+
+  function isBuyable() public view returns(bool) {
+    return buyer == address(0);
   }
 
   function deal() public onlyRefereeOrBuyer {
-    uint v = paidPrices[msg.sender];
-    refund_(seller, v);
-    withdraw_(seller);
-    emit NewDeal(address(this), assetId, seller, msg.sender, v);
-  }
-
-  function withdraw_(address u) private {
-    uint val = pendingWithdrawals[u];
-    if (val > 0) {
-      pendingWithdrawals[u] = 0;
-      bdn.transfer(u, val);
-    }
-  }
-
-  function refund_(address u, uint val) private {
-    uint pf = pendingWithdrawals[u];
-    pf = pf.add(val);
-    pendingWithdrawals[u] = pf;
+    bdn.transfer(seller, paidPrice);
+    emit Dealt(address(this), assetId, seller, paidPrice);
   }
 }
